@@ -1,25 +1,22 @@
-"""Database manager for handling multiple database connections"""
-
 import logging
 from typing import Optional, Dict, Type
 from .mongodb import MongoDBClient
 from .milvus import MilvusClient
 from .redis import RedisDB
 from .base_database import BaseDatabase
+from .elastic import ElasticClient
 logger = logging.getLogger(__name__)
 
 class DatabaseManager:
-    """Manages database connections"""
-    
     def __init__(self, database_configs: Optional[Dict[str, Type[BaseDatabase]]] = None):
         self.databases: Dict[str, BaseDatabase] = {}
         
-        # Default configuration
         if database_configs is None:
             database_configs = {
                 'mongodb': MongoDBClient,
                 'milvus': MilvusClient,
-                'redis': RedisDB
+                # 'redis': RedisDB
+                'elastic': ElasticClient
             }
         
         self._initialize_databases(database_configs)
@@ -42,7 +39,9 @@ class DatabaseManager:
     def get_redis(self):
         """Get Redis client"""
         return self.databases.get('redis')
-    
+    def get_elastic(self):
+        """Get Elastic client"""
+        return self.databases.get('elastic')
     def close_connections(self) -> None:
         for db_name, db_instance in self.databases.items():
             try:

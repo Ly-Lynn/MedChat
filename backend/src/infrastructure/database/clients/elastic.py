@@ -1,8 +1,8 @@
 import logging
-from backend.src.data.clients.elastic import Elasticsearch
 from src.common.config import Config
 from typing import Dict, Any, Optional
 from .base_database import BaseDatabase
+from elasticsearch import Elasticsearch
 
 logger = logging.getLogger(__name__)
 
