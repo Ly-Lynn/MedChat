@@ -1,0 +1,14 @@
+volumes/
+
+.env
+
+.env.local
+
+*.log
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+

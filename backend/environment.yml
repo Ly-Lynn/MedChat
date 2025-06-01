@@ -1,0 +1,38 @@
+name: medchat
+channels:
+  - pytorch
+  - huggingface
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - Flask==2.3.3
+  - Flask-CORS==4.0.0
+  - pydantic<2.0.0
+  - python-dotenv==1.0.0
+  - pymongo==4.5.0
+  - motor==3.3.1
+  - elasticsearch==8.9.0
+  - nltk==3.8.1
+  - spacy==3.6.1
+  - aiofiles==23.2.1
+  - numpy==1.24.3
+  - pandas==2.0.3
+  - scikit-learn==1.3.0
+  - structlog==23.1.0
+  - pytest==7.4.2
+  - pytest-asyncio==0.21.1
+  - black==23.7.0
+  - flake8==6.0.0
+  - pip:
+      - torch==2.0.1
+      - transformers==4.33.2
+      - sentence-transformers==2.2.2
+      - langchain==0.0.292
+      - langchain-community==0.0.1
+      - pymilvus==2.3.1
+      - redis==5.0.0
+      - gunicorn==21.2.0
+      - uvicorn==0.23.2
+      - asyncio==3.4.3
