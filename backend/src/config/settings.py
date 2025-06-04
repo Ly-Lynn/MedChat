@@ -1,5 +1,6 @@
 import os
 from typing import Optional
+import torch
 
 class Settings:
     """Application settings"""
@@ -7,7 +8,7 @@ class Settings:
     def __init__(self):
         # Debug mode
         self.DEBUG: bool = os.getenv("DEBUG", "True").lower() == "true"
-        
+        self.DEVICE: str = "cuda" if torch.cuda.is_available() else "cpu"
         # Database settings
         self.MONGODB_URI: str = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
         self.MONGO_DATABASE: str = os.getenv("MONGO_DATABASE", "medchat")

@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import logging
 from typing import Dict, Any, List, Optional
-from backend.src.domains.healthcare.data_ingestion.schemas.pubmed_schemas import ArticleSection
+from src.domains.healthcare.data_ingestion.schemas.pubmed_schemas import ArticleSection
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,6 @@ class XMLParser:
         """
         try:
             soup = BeautifulSoup(xml_string, "xml")
-            
             result = {
                 # Use metadata as base
                 "title": metadata.get('title', ''),

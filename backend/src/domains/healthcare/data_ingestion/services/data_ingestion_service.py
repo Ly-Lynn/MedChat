@@ -1,9 +1,11 @@
-"""Data ingestion service for healthcare data"""
-
 import logging
 from typing import List, Dict, Any, Optional
 import asyncio
 from datetime import datetime
+from src.domains.healthcare.data_ingestion.crawlers.pubmed_crawler import PubMedCrawler
+from src.domains.healthcare.embedding.models.biobert_embedding import BioBERTEmbedding
+from src.domains.healthcare.data_ingestion.schemas.pubmed_schemas import PubMedArticle
+from src.config.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -21,13 +23,29 @@ class DataIngestionService:
     
     def __init__(self):
         """Initialize data ingestion service"""
-        self.crawler = MockCrawler()
+        self.crawler = PubMedCrawler()
+        self.embedding_model = BioBERTEmbedding(
+            device = settings.DEVICE
+        )
         self.stats = {
             "total_documents": 0,
             "total_jobs": 0,
             "last_ingestion": None
         }
-    
+    def _get_embedding_data(self, articles: List[PubMedArticle]) -> List[Dict[str, Any]]:
+        """Get embedding data from articles"""
+        # pass
+        for article in articles:
+            embedding_data = {
+                "id": article.pmid,
+                "title": article.title,
+                "abstract": article.abstract,
+                "authors": article.authors,
+                "sections": [f"{section.heading}: {section.text}" for section in article.sections]
+            }
+            self.embedding_model.embed_document(embedding_data)
+
+            
     async def ingest_from_queries(self, queries: List[str], articles_per_query: int = 10, 
                                 generate_embeddings: bool = True) -> DataIngestionResult:
         """Ingest data from search queries
@@ -47,13 +65,29 @@ class DataIngestionService:
             logger.info(f"🔄 Starting data ingestion for queries: {queries}")
             
             total_processed = 0
+            print("queries", queries)
             for query in queries:
-                # Mock processing
-                await asyncio.sleep(0.1)  # Simulate processing time
-                processed_count = min(articles_per_query, 5)  # Mock limited results
-                total_processed += processed_count
+                # crawling articles with crawler
+                articles = self.crawler.crawl_by_query(query, articles_per_query)
+                # embedding articles with embedding model
+                # embedding_datas = self.get_embedding_data(articles)
                 
+                # embeddings = self.embedding_model.embed_documents(articles)
+
+                processed_count = len(articles)
+                total_processed += processed_count
                 logger.info(f"✅ Processed {processed_count} articles for query: {query}")
+
+                # DEBUG
+                print("ARTICLES", articles[0])
+                print("len(articles)", len(articles))
+                break
+                # # Mock processing
+                # await asyncio.sleep(0.1)  # Simulate processing time
+                # processed_count = min(articles_per_query, 5)  # Mock limited results
+                # total_processed += processed_count
+                
+                # logger.info(f"✅ Processed {processed_count} articles for query: {query}")
             
             result.total_processed = total_processed
             result.processing_time = (datetime.now() - start_time).total_seconds()

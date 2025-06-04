@@ -8,8 +8,8 @@ import re
 import logging
 from typing import Tuple, Optional, List, Dict, Any
 from tqdm import tqdm
-from backend.src.domains.healthcare.data_ingestion.schemas.pubmed_schemas import PubMedArticle, CrawlerConfig
-from backend.src.domains.healthcare.data_ingestion.parsers.xml_parser import XMLParser
+from src.domains.healthcare.data_ingestion.schemas.pubmed_schemas import PubMedArticle, CrawlerConfig
+from src.domains.healthcare.data_ingestion.parsers.xml_parser import XMLParser
 from src.config.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -171,13 +171,13 @@ class PubMedCrawler:
         
         try:
             response = self._make_request(url)
-            
+            # print("RESPONSE", response.text)
             # Parse XML content
             parsed_content = self.xml_parser.parse_pubmed_xml(response.text, metadata)
-            
+            # print("PARSED_CONTENT", parsed_content)
             # Create PubMedArticle object
             article = PubMedArticle(**parsed_content)
-            
+            # print("ARTICLE", article)
             logger.debug(f"Successfully fetched article: {article.title}")
             return article
             
@@ -185,7 +185,7 @@ class PubMedCrawler:
             logger.error(f"Failed to fetch full text for {pmcid}: {str(e)}")
             return None
 
-    def crawl_by_queries(self, queries: List[str], articles_per_query: int = 10) -> List[PubMedArticle]:
+    def crawl_by_query(self, query: str, articles_per_query: int = 10) -> List[PubMedArticle]:
         """
         Crawl articles for multiple queries
         
@@ -196,25 +196,21 @@ class PubMedCrawler:
         Returns:
             List of all fetched articles
         """
-        all_articles = []
         
-        for query in queries:
-            logger.info(f"Processing query: {query}")
-            
-            # Search for metadata
-            metadata_list = self.search_metadata(query, limit=articles_per_query)
-            
-            if metadata_list:
-                # Fetch full text articles
-                articles = self.get_full_text_articles(metadata_list)
-                all_articles.extend(articles)
-                
-                logger.info(f"Query '{query}': fetched {len(articles)} articles")
-            else:
-                logger.warning(f"No articles found for query: {query}")
+        logger.info(f"Processing query: {query}")
+    
+        # Search for metadata
+        metadata_list = self.search_metadata(query, limit=articles_per_query)
         
-        logger.info(f"Total articles crawled: {len(all_articles)}")
-        return all_articles
+        if metadata_list:
+            # Fetch full text articles
+            articles = self.get_full_text_articles(metadata_list)
+            
+            logger.info(f"Query '{query}': fetched {len(articles)} articles")
+        else:
+            logger.warning(f"No articles found for query: {query}")
+        
+        return articles
 
     def save_articles_to_json(self, articles: List[PubMedArticle], output_dir: str = "data/pubmed"):
         """Save articles to JSON files"""
